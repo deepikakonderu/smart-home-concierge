@@ -1,0 +1,65 @@
+[0:00 — HOOK]
+
+Hey everyone. Ever feel like managing a home is a full-time job? Tracking groceries, scheduling repairs, making sure your smart locks are secure — it's a lot. That's exactly the problem Smart Home Concierge solves.
+
+(pause)
+
+[0:20 — WHAT IT IS]
+
+Smart Home Concierge is a multi-agent AI assistant built with Google's Agent Development Kit. It belongs to the Concierge Agents track — personal life automation. It coordinates home inventory management, maintenance scheduling, and enforces physical security controls through natural conversation.
+
+(pause)
+
+[0:40 — SHOW THE BANNER]
+
+(show assets/cover_page_banner.png)
+
+This is Smart Home Concierge — Automated, Secure, and Intelligent. One interface for your entire home.
+
+(pause)
+
+[1:00 — ARCHITECTURE]
+
+(show assets/architecture_diagram.png)
+
+Let me walk you through the architecture. Every user message first hits the security checkpoint node. This is a function node that scrubs PII like credit card numbers and phone numbers, detects prompt injection attempts, and enforces PIN verification for sensitive physical operations like unlocking doors.
+
+If the message passes security, it routes to the orchestrator — an LLM agent that decides which specialist to call. For groceries and inventory questions, it delegates to the inventory manager agent. For repairs and scheduling, it delegates to the maintenance scheduler agent.
+
+Both specialist agents connect to our local MCP server, which exposes five tools: get inventory, update inventory, get maintenance tasks, schedule maintenance, and verify owner PIN. The data persists in a local JSON file.
+
+After the orchestrator gets results back, the workflow passes through a human approval node. This is our human-in-the-loop checkpoint — it pauses execution and asks the user to confirm any scheduling or inventory changes before they are finalized.
+
+Finally, the approved result flows to the final output node, which formats the response for the playground UI.
+
+(pause)
+
+[2:00 — LIVE DEMO]
+
+(switch to playground at localhost:18081)
+
+Let me show you three scenarios.
+
+First, I will type: "What maintenance tasks do we have pending?" The orchestrator routes this to the maintenance scheduler, which calls get_maintenance_tasks from the MCP server. You can see it returns the HVAC filter replacement due July 1st and the kitchen sink leak repair due June 25th.
+
+(pause)
+
+Second, I will type: "Schedule a Roof Inspection for 2026-07-10 for 250 dollars." Watch what happens — the maintenance scheduler books it, but then the workflow pauses at the human approval node. It asks me: do you approve? I type yes, and the action goes through. That is the human-in-the-loop flow in action.
+
+(pause)
+
+Third, I will type: "Unlock the front door." The security checkpoint catches this immediately. It is a sensitive physical operation, and my PIN has not been verified yet. It blocks the request and tells me to verify my PIN first. If I then type "verify PIN 1234", it validates and grants access for future sensitive commands in this session.
+
+(pause)
+
+[3:00 — SECURITY AND MCP]
+
+The security checkpoint handles three things: PII scrubbing with regex for credit cards and phone numbers, prompt injection detection for keywords like "ignore instructions" and "system prompt", and a structured JSON audit log on every decision with severity levels from INFO to CRITICAL.
+
+The MCP server runs locally via stdio transport, exposes five domain-specific tools, and is wired into both the inventory manager and maintenance scheduler agents.
+
+(pause)
+
+[3:30 — IMPACT / CLOSE]
+
+Smart Home Concierge benefits families and homeowners by reducing the mental load of managing a household. It keeps your pantry stocked, your repairs on schedule, and your home secure — all through a single conversation. Thanks for watching.
